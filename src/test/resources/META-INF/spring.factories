@@ -1,0 +1,2 @@
+org.springframework.test.context.ContextCustomizerFactory = \
+    be.bvl.poc.config.SqlTestContainersSpringContextCustomizerFactory
