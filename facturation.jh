@@ -1,0 +1,203 @@
+// === ENTITÉS PRINCIPALES ===
+
+entity Tiers {
+  nomTiers String,
+  adresseLigne1 String,
+  adresseLigne2 String,
+  ville String,
+  codePostal String,
+  pays String,
+  numeroTelephone String,
+  adresseEmail String,
+  numeroTVA String,
+  dateCreation Instant,
+  actif Boolean
+}
+
+entity Produit {
+  nomProduit String,
+  description TextBlob,
+  codeSKU String,
+  actif Boolean,
+  dateCreation Instant
+}
+
+entity Unite {
+  nomUnite String,
+  symboleUnite String,
+  description TextBlob
+}
+
+entity PrixProduitUnite {
+  prixUnitaireHT BigDecimal,
+  dateDebutValidite Instant,
+  dateFinValidite Instant
+}
+
+entity Facture {
+  numeroFacture String,
+  dateFacture LocalDate,
+  dateEcheance LocalDate,
+  statutFacture String,
+  montantFactureSansReductionTTC BigDecimal,
+  montantReductionTTCTotal BigDecimal,
+  montantTotalFactureTTC BigDecimal,
+  notesFacture TextBlob,
+  dateCreation Instant,
+  dateDerniereMiseAJour Instant
+}
+
+entity LigneFacture {
+  quantite BigDecimal,
+  prixUnitaireHT BigDecimal,
+  montantHTLigne BigDecimal,
+  montantTVALigne BigDecimal,
+  descriptionLigne TextBlob
+}
+
+entity CodeTVA {
+  nomCodeTVA String,
+  tauxTVA BigDecimal,
+  description TextBlob,
+  actif Boolean
+}
+
+entity Caracteristique {
+  nomCaracteristique String,
+  typeValeur String
+}
+
+entity ValeurCaracteristiquePredefinie {
+  valeur String
+}
+
+entity LigneFactureCaracteristique {
+  valeurSaisie TextBlob
+}
+
+entity ModeleFacture {
+  nomModele String,
+  descriptionModele TextBlob,
+  cheminFichierModele String,
+  contenuHTMLModele TextBlob,
+  textePiedFactureDefaut TextBlob,
+  texteEnteteFactureDefaut TextBlob,
+  logoUtilise String,
+  dateCreation Instant,
+  actif Boolean
+}
+
+entity CodeFacturation {
+  nomCode String,
+  description TextBlob
+}
+
+entity ProduitParCodeFacturation {}
+
+entity CaracteristiqueParCodeFacturation {}
+
+entity RegleReduction {
+  nomRegle String,
+  typeReduction String,
+  valeurReduction BigDecimal,
+  conditionCible String,
+  conditionType String,
+  conditionValeur String,
+  estActive Boolean,
+  dateDebutValidite LocalDate,
+  dateFinValidite LocalDate,
+  descriptionRegle TextBlob
+}
+
+entity FactureReductionAppliquee {
+  montantReductionHT BigDecimal,
+  montantReductionTVA BigDecimal,
+  montantReductionTTC BigDecimal,
+  dateApplication Instant,
+  detailsCalcul TextBlob
+}
+
+entity RegleReductionParCodeFacturation {}
+
+entity ExpressionCalculLigne {
+  nomExpression String,
+  expressionHT TextBlob,
+  expressionTVA TextBlob,
+  descriptionExpression TextBlob,
+  estParDefaut Boolean,
+  dateCreation Instant,
+  dateDerniereMiseAJour Instant,
+  actif Boolean
+}
+
+entity FactureResumeTVA {
+  montantHTParTaux BigDecimal,
+  montantTVAParTaux BigDecimal
+}
+
+entity CodeMontant {
+  nomCode String,
+  description TextBlob,
+  actif Boolean,
+  dateCreation Instant
+}
+
+entity FactureCodeMontant {
+  typeMontantAssocie String
+}
+
+entity LigneFactureCodeMontant {
+  typeMontantAssocie String
+}
+
+entity FactureResumeTVACodeMontant {
+  typeMontantAssocie String
+}
+
+// === RELATIONS ===
+
+relationship OneToMany {
+  Tiers{factures} to Facture{tiers},
+  Facture{lignes} to LigneFacture{facture},
+  Produit{prixProduitUnites} to PrixProduitUnite{produit},
+  Unite{prixProduitUnites} to PrixProduitUnite{unite},
+  LigneFacture{caracteristiques} to LigneFactureCaracteristique{ligneFacture},
+  Caracteristique{valeursPredefinies} to ValeurCaracteristiquePredefinie{caracteristique},
+  ModeleFacture{factures} to Facture{modeleFacture},
+  CodeFacturation{factures} to Facture{codeFacturation},
+  CodeFacturation{produitsParCode} to ProduitParCodeFacturation{codeFacturation},
+  Produit{produitsParCode} to ProduitParCodeFacturation{produit},
+  CodeFacturation{caracteristiquesParCode} to CaracteristiqueParCodeFacturation{codeFacturation},
+  Caracteristique{caracteristiquesParCode} to CaracteristiqueParCodeFacturation{caracteristique},
+  Facture{reductionsAppliquees} to FactureReductionAppliquee{facture},
+  RegleReduction{reductionsAppliquees} to FactureReductionAppliquee{regleReduction},
+  RegleReduction{reglesParCode} to RegleReductionParCodeFacturation{regleReduction},
+  CodeFacturation{reglesParCode} to RegleReductionParCodeFacturation{codeFacturation},
+  ExpressionCalculLigne{lignesFacture} to LigneFacture{expressionCalculUtiliseeHT},
+  ExpressionCalculLigne{produits} to Produit{expressionCalculDefautHT},
+  Facture{resumeTVA} to FactureResumeTVA{facture},
+  CodeTVA{produits} to Produit{codeTVA},
+  CodeTVA{resumeTVA} to FactureResumeTVA{codeTVA},
+  Facture{codesMontant} to FactureCodeMontant{facture},
+  CodeMontant{factureCodes} to FactureCodeMontant{codeMontant},
+  LigneFacture{codesMontant} to LigneFactureCodeMontant{ligneFacture},
+  CodeMontant{ligneCodes} to LigneFactureCodeMontant{codeMontant},
+  FactureResumeTVA{codesMontant} to FactureResumeTVACodeMontant{factureResumeTVA},
+  CodeMontant{resumeTVACodes} to FactureResumeTVACodeMontant{codeMontant}
+}
+
+relationship ManyToOne {
+  PrixProduitUnite{produit} to Produit,
+  PrixProduitUnite{unite} to Unite,
+  LigneFacture{produit} to Produit,
+  LigneFacture{unite} to Unite,
+  LigneFacture{codeTVA} to CodeTVA,
+  LigneFactureCaracteristique{caracteristique} to Caracteristique,
+  LigneFactureCaracteristique{valeurCaracteristique} to ValeurCaracteristiquePredefinie
+}
+
+// === OPTIONS ===
+
+paginate all with pagination
+service all with serviceClass
+dto all with mapstruct
